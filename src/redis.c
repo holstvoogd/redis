@@ -388,12 +388,18 @@ err:
 
 /* Return the UNIX time in microseconds */
 long long ustime(void) {
-    struct timeval tv;
     long long ust;
 
+#ifdef __MACH__
+    struct timeval tv;
     gettimeofday(&tv, NULL);
-    ust = ((long long)tv.tv_sec)*1000000;
-    ust += tv.tv_usec;
+    ust = ((long long)tv.tv_usec);
+#else
+    struct timespec tv;
+    clock_gettime(CLOCK_MONOTONIC, &tv);
+    ust = ((long long)tv.tv_nsec)/1000;
+#endif
+    ust += tv.tv_sec*1000000;
     return ust;
 }
 
